@@ -1,0 +1,109 @@
+{
+  "shared": {
+    "q1": {
+      "prompt": "The SALES_BY_STORE view is built from which base tables? (Read the <code>text</code> column in the SHOW VIEWS output above.)",
+      "choices": {
+        "a": {
+          "text": "STORES and ORDERS",
+          "feedback": "Correct! The view selects FROM STORES and LEFT JOINs ORDERS on store_id."
+        },
+        "b": {
+          "text": "ORDERS and ORDER_ITEMS",
+          "feedback": "Not quite — re-read the FROM / JOIN in the view's text."
+        },
+        "c": {
+          "text": "STORES, ORDERS, and CUSTOMERS",
+          "feedback": "Close, but CUSTOMERS isn't referenced — check the view's text."
+        },
+        "d": {
+          "text": "STORES only",
+          "feedback": "A view can read more than one table — look for the JOIN in its text."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "Your query <em>context</em> in Snowflake is made up of which four things?",
+      "choices": {
+        "a": {
+          "text": "Role, warehouse, database, and schema",
+          "feedback": "Correct! Context = role · warehouse · database · schema. Setting it makes your results predictable."
+        },
+        "b": {
+          "text": "Username, password, region, and account",
+          "feedback": "Those identify your session/account — the query context is role, warehouse, database, and schema."
+        },
+        "c": {
+          "text": "Database, schema, table, and column",
+          "feedback": "Those are object levels, not your session context (role, warehouse, database, schema)."
+        },
+        "d": {
+          "text": "Warehouse size, credits, role, and user",
+          "feedback": "Not quite — context is role, warehouse, database, and schema."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "What is the correct top-to-bottom object hierarchy in Snowflake?",
+      "choices": {
+        "a": {
+          "text": "Account → database → schema → table/view",
+          "feedback": "Correct! Objects nest account → database → schema → table/view."
+        },
+        "b": {
+          "text": "Database → account → schema → table",
+          "feedback": "The account is the top level, above databases."
+        },
+        "c": {
+          "text": "Schema → database → table → account",
+          "feedback": "Reversed — it's account → database → schema → table/view."
+        },
+        "d": {
+          "text": "Account → schema → database → table",
+          "feedback": "Databases contain schemas, not the other way around."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "In this course, where do you create and own the objects you build?",
+      "choices": {
+        "a": {
+          "text": "In your own database (e.g. USER_DB); the shared PLATPLUS_DB is read-only to you",
+          "feedback": "Correct! You build in your own database; PLATPLUS_DB is shared and read-only, so you can't break it."
+        },
+        "b": {
+          "text": "Directly in PLATPLUS_DB.ROASTERY_SALES",
+          "feedback": "PLATPLUS_DB is shared and read-only — you create in your own database instead."
+        },
+        "c": {
+          "text": "In the SNOWFLAKE system database",
+          "feedback": "That's a system database you only read from. You build in your own database."
+        },
+        "d": {
+          "text": "Learners can't create objects",
+          "feedback": "You can — in your own database, which you own."
+        }
+      }
+    },
+    "q5": {
+      "prompt": "You discover that FEEDBACK.comment contains free-text customer reviews. What should you do <em>before</em> granting SELECT on FEEDBACK to a new analyst role?",
+      "choices": {
+        "a": {
+          "text": "Run SHOW GRANTS ON TABLE FEEDBACK to see who already has access",
+          "feedback": "Correct! You need the current state before you change it. SHOW GRANTS ON TABLE tells you every role with any privilege on that object — your governance baseline before Lab 3."
+        },
+        "b": {
+          "text": "Run SELECT * FROM FEEDBACK to check the data is safe",
+          "feedback": "Reading the data doesn't tell you who else can read it. SHOW GRANTS ON TABLE shows the access picture without requiring you to inspect the content."
+        },
+        "c": {
+          "text": "Grant SELECT immediately — you can always revoke it later",
+          "feedback": "Grant-then-revoke is a compliance risk. The right order is: understand current access → design the intended state → grant or revoke to match."
+        },
+        "d": {
+          "text": "Ask the DBA who originally loaded the data",
+          "feedback": "SHOW GRANTS ON TABLE gives you the authoritative answer in seconds — faster and more reliable than a conversation."
+        }
+      }
+    }
+  }
+}
