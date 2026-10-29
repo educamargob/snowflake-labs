@@ -1,0 +1,151 @@
+{
+  "shared": {
+    "q1": {
+      "prompt": "When you ask CoCo a business question, what does it actually give you back?",
+      "choices": {
+        "a": {
+          "text": "SQL you read, run, and verify yourself",
+          "feedback": "Correct! CoCo writes the SQL — you stay accountable for reading, running, and checking it."
+        },
+        "b": {
+          "text": "A final answer you can trust without checking",
+          "feedback": "Not quite — CoCo is fast, but you verify the result. The lab's whole 'trust but verify' step exists for this reason."
+        },
+        "c": {
+          "text": "A chart only, with no underlying query",
+          "feedback": "CoCo writes the SQL behind the answer — you can read and modify it."
+        },
+        "d": {
+          "text": "A change to the underlying data",
+          "feedback": "Asking a question runs a read query; it doesn't change the data."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "Most of the questions in this lab were answered by the same SQL shape. What is it?",
+      "choices": {
+        "a": {
+          "text": "SELECT ... FROM ... JOIN ... WHERE ... GROUP BY ... ORDER BY",
+          "feedback": "Correct! Change the grouping column or the table and the same pattern answers a new question."
+        },
+        "b": {
+          "text": "CREATE TABLE ... AS SELECT",
+          "feedback": "That builds a new table — these were read-only questions using SELECT/JOIN/GROUP BY."
+        },
+        "c": {
+          "text": "INSERT ... VALUES ...",
+          "feedback": "That writes rows — the lab only queried existing data."
+        },
+        "d": {
+          "text": "GRANT ... TO ROLE ...",
+          "feedback": "That's access control (Lab 3). Here you were querying data."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "You asked CoCo to show only stores with an average score below 4. Which clause does that filtering, and why?",
+      "choices": {
+        "a": {
+          "text": "HAVING — it filters groups after GROUP BY",
+          "feedback": "Correct! AVG(score) is computed per group, so the threshold has to be applied with HAVING, after grouping."
+        },
+        "b": {
+          "text": "WHERE — it filters the grouped averages",
+          "feedback": "WHERE runs before grouping, so it can't see AVG(score). The group-level filter is HAVING."
+        },
+        "c": {
+          "text": "ORDER BY — it drops the rows you don't want",
+          "feedback": "ORDER BY only sorts; it doesn't remove rows."
+        },
+        "d": {
+          "text": "LIMIT — it keeps only the low scorers",
+          "feedback": "LIMIT caps the row count regardless of value; it can't filter by a computed average."
+        }
+      }
+    },
+    "q5": {
+      "prompt": "You type '@PLATPLUS_DB.ROASTERY_SALES' before your question in CoCo. What does this do?",
+      "choices": {
+        "a": {
+          "text": "Grants CoCo permission to query that database",
+          "feedback": "The @ reference is about context, not permissions — your role already determines what you can query."
+        },
+        "b": {
+          "text": "Gives CoCo the actual table names and column names so it writes accurate SQL instead of guessing",
+          "feedback": "Correct! The @ picker grounds CoCo in your real schema — it can see the tables and columns and write SQL that actually runs."
+        },
+        "c": {
+          "text": "Switches your session to that database automatically",
+          "feedback": "USE DATABASE changes your session context; @ in CoCo is about giving the AI schema context, not switching your session."
+        },
+        "d": {
+          "text": "Searches the Marketplace for matching datasets",
+          "feedback": "That's the Marketplace tab. @ in the CoCo prompt is the schema/object picker for grounding your question."
+        }
+      }
+    },
+    "q6": {
+      "prompt": "You load the roastery-analyst skill before asking CoCo a question. What changes?",
+      "choices": {
+        "a": {
+          "text": "CoCo runs faster because it skips schema discovery",
+          "feedback": "Speed isn't the main benefit. The skill changes what CoCo *knows*, not how fast it runs."
+        },
+        "b": {
+          "text": "CoCo has pre-loaded schema context and business knowledge, so it can answer domain-specific questions accurately without needing @ references",
+          "feedback": "Correct! A skill packages reusable context — schema, business definitions, common patterns — so the whole team benefits from it, not just the person who built it."
+        },
+        "c": {
+          "text": "CoCo switches to a more powerful AI model",
+          "feedback": "Skills don't change the underlying model — they add structured context that makes the model more useful for your specific domain."
+        },
+        "d": {
+          "text": "CoCo gains write access to your database",
+          "feedback": "Skills add knowledge context; database permissions are still controlled by your Snowflake role, not by CoCo."
+        }
+      }
+    },
+    "q7": {
+      "prompt": "In the Data Engineer section, you created a dynamic table instead of running a query. What is the key difference?",
+      "choices": {
+        "a": {
+          "text": "A dynamic table stores a fixed snapshot that you have to refresh manually",
+          "feedback": "That's a static table. A dynamic table refreshes automatically based on TARGET_LAG — no manual refresh needed."
+        },
+        "b": {
+          "text": "A dynamic table is a persisted, auto-refreshing result set — the query runs on a schedule so the data stays current without manual reruns",
+          "feedback": "Correct! TARGET_LAG tells Snowflake how fresh the result needs to be. The DE doesn't run the query again — it just queries the dynamic table and gets current results."
+        },
+        "c": {
+          "text": "A dynamic table is faster than a regular query because it caches the warehouse",
+          "feedback": "Performance isn't the main point. The value is automation — results stay fresh without someone running the query manually every day."
+        },
+        "d": {
+          "text": "A dynamic table can only be queried by the role that created it",
+          "feedback": "Dynamic tables follow normal Snowflake RBAC — you can GRANT SELECT on them to other roles, just like any table."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "Which store came out on top in the revenue results?",
+      "choices": {
+        "a": {
+          "text": "Roastery Midtown",
+          "feedback": "Not quite — check the top row of your results and try again."
+        },
+        "b": {
+          "text": "Roastery Downtown",
+          "feedback": "Not quite — check the top row of your results and try again."
+        },
+        "c": {
+          "text": "Roastery Pike",
+          "feedback": "Correct! Roastery Pike leads the ranking. Notice the gap between first and last — does anything about the ordering surprise you?"
+        },
+        "d": {
+          "text": "Roastery Loop",
+          "feedback": "Not quite — check the top row of your results and try again."
+        }
+      }
+    }
+  }
+}

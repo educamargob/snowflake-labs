@@ -1,0 +1,53 @@
+{
+  "shared": {
+    "q1": {
+      "correct": [
+        "a"
+      ],
+      "multiselect": false,
+      "shuffle_choices": true
+    },
+    "q2": {
+      "correct": [
+        "a"
+      ],
+      "multiselect": false,
+      "shuffle_choices": true
+    },
+    "q3": {
+      "correct": [
+        "a"
+      ],
+      "multiselect": false,
+      "shuffle_choices": true
+    },
+    "q5": {
+      "correct": [
+        "b"
+      ],
+      "multiselect": false,
+      "shuffle_choices": true
+    },
+    "q6": {
+      "correct": [
+        "b"
+      ],
+      "multiselect": false,
+      "shuffle_choices": true
+    },
+    "q7": {
+      "correct": [
+        "b"
+      ],
+      "multiselect": false,
+      "shuffle_choices": true
+    },
+    "q4": {
+      "correct": [
+        "c"
+      ],
+      "multiselect": false,
+      "shuffle_choices": true
+    }
+  }
+}
