@@ -1,0 +1,260 @@
+{
+  "data_analyst": {
+    "q1": {
+      "prompt": "In Snowflake's RBAC model, privileges are granted to:",
+      "choices": {
+        "a": {
+          "text": "Roles — then roles are assigned to users",
+          "feedback": "Correct! The chain is privilege → role → user. You grant to roles, not directly to users."
+        },
+        "b": {
+          "text": "Users directly — roles are just labels",
+          "feedback": "Not quite — Snowflake uses Role-Based Access Control. Privileges go to roles, and roles are granted to users."
+        },
+        "c": {
+          "text": "Databases — then users inherit from the database",
+          "feedback": "Databases don't hold privileges on behalf of users. Privileges are granted to roles."
+        },
+        "d": {
+          "text": "Schemas — which pass them down to tables automatically",
+          "feedback": "Schemas don't distribute privileges. Each level (database, schema, table) requires its own explicit grant to the role."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "To successfully query a table, your role needs grants at which levels?",
+      "choices": {
+        "a": {
+          "text": "Warehouse (USAGE) → Database (USAGE) → Schema (USAGE) → Table (SELECT)",
+          "feedback": "Correct! All four links in the chain are required. Missing any one = access denied."
+        },
+        "b": {
+          "text": "Just SELECT on the table — the rest is automatic",
+          "feedback": "No — Snowflake requires grants at every level. Without USAGE on the database or schema, you can't even see the table."
+        },
+        "c": {
+          "text": "Database (USAGE) and Table (SELECT) only",
+          "feedback": "Close, but you also need USAGE on the warehouse (for compute) and USAGE on the schema (to see objects inside it)."
+        },
+        "d": {
+          "text": "ACCOUNTADMIN role — only admins can query tables",
+          "feedback": "Any role can query a table as long as it has the full grant chain. ACCOUNTADMIN is not required for reading data."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "You see the error: <em>\"Object 'FEEDBACK' does not exist or not authorized.\"</em> What does this most likely mean?",
+      "choices": {
+        "a": {
+          "text": "Your current role doesn't have a grant to access that table — the table still exists",
+          "feedback": "Correct! Snowflake uses this vague message deliberately to avoid revealing what objects exist to unauthorized roles. The fix is a GRANT, not a CREATE."
+        },
+        "b": {
+          "text": "The table was dropped and no longer exists",
+          "feedback": "While possible, this message almost always means a missing privilege — not a missing table. Check your grants first."
+        },
+        "c": {
+          "text": "The table is corrupted and needs to be recreated",
+          "feedback": "Snowflake tables don't \"corrupt\" this way. The error means your role lacks a privilege on the object."
+        },
+        "d": {
+          "text": "You need to run USE DATABASE first to refresh the cache",
+          "feedback": "USE DATABASE sets context but won't help if the role lacks grants. The fix is granting the missing privilege."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "What does <code>USE SECONDARY ROLES ALL</code> do?",
+      "choices": {
+        "a": {
+          "text": "Combines privileges from all your granted roles with your primary role — expanding effective access",
+          "feedback": "Correct! Secondary roles let you access data from all your granted roles without switching. Your primary role still controls object ownership."
+        },
+        "b": {
+          "text": "Switches your primary role to a different role",
+          "feedback": "That would be USE ROLE. Secondary roles keep your primary role unchanged and add other roles' privileges on top."
+        },
+        "c": {
+          "text": "Grants new privileges permanently to your primary role",
+          "feedback": "Secondary roles don't create new grants — they activate existing roles you already have for the current session only."
+        },
+        "d": {
+          "text": "Gives you ACCOUNTADMIN-level access temporarily",
+          "feedback": "It only activates roles already granted to you. If you don't have ACCOUNTADMIN, you won't get its privileges."
+        }
+      }
+    }
+  },
+  "data_engineer": {
+    "q1": {
+      "prompt": "What do <code>GRANT SELECT ON FUTURE TABLES IN SCHEMA</code> statements do?",
+      "choices": {
+        "a": {
+          "text": "Automatically grant SELECT on every table created in that schema from now on",
+          "feedback": "Correct! Future grants apply to objects that don't exist yet. Any new table created in the schema will automatically get the specified grant."
+        },
+        "b": {
+          "text": "Grant SELECT on all tables that currently exist in the schema",
+          "feedback": "That's what ON ALL TABLES does. ON FUTURE TABLES only covers tables created after the statement runs — you need both for complete coverage."
+        },
+        "c": {
+          "text": "Grant SELECT on tables in all schemas across the database",
+          "feedback": "Future grants are scoped to the specific schema (or database) named in the statement, not all schemas."
+        },
+        "d": {
+          "text": "Temporarily grant SELECT until the table is dropped",
+          "feedback": "Future grants are permanent (until explicitly revoked). They're not time-limited or tied to table lifecycle."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "Why should a data engineer include GRANT statements in the same script as CREATE TABLE?",
+      "choices": {
+        "a": {
+          "text": "Because a table nobody can read is effectively invisible — grants are part of deployment, not an afterthought",
+          "feedback": "Correct! CREATE + GRANT ship together as one atomic unit. If you separate them, there's a window where consumers can't access the data — and manual grant requests create bottlenecks."
+        },
+        "b": {
+          "text": "Because Snowflake requires it — CREATE TABLE fails without a GRANT in the same transaction",
+          "feedback": "Snowflake doesn't require them together. It's a best practice, not a technical requirement. Tables can exist without any grants."
+        },
+        "c": {
+          "text": "Because GRANT statements must come before CREATE TABLE in Snowflake",
+          "feedback": "Actually GRANT comes after CREATE — you can't grant on an object that doesn't exist yet. The best practice is to include them together in the same script."
+        },
+        "d": {
+          "text": "Because tables are automatically dropped if not granted within 24 hours",
+          "feedback": "There's no auto-drop. Tables persist indefinitely without grants — they just can't be seen by other roles. The reason to co-deploy is operational, not technical."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "You've set up <code>ON FUTURE TABLES</code> grants but existing tables are still inaccessible. What's missing?",
+      "choices": {
+        "a": {
+          "text": "You also need GRANT SELECT ON ALL TABLES — future grants don't cover tables that already exist",
+          "feedback": "Correct! ON FUTURE only covers objects created after the grant. You need ON ALL TABLES for existing objects. Always pair both for complete coverage."
+        },
+        "b": {
+          "text": "You need to drop and recreate the existing tables for future grants to apply",
+          "feedback": "That's destructive and unnecessary. Just run GRANT SELECT ON ALL TABLES to cover existing objects alongside your future grants."
+        },
+        "c": {
+          "text": "Future grants take 24 hours to propagate to existing objects",
+          "feedback": "Future grants never propagate to existing objects — that's by design. Use ON ALL TABLES for objects that already exist."
+        },
+        "d": {
+          "text": "You need to run ALTER TABLE ... REFRESH GRANTS on each table",
+          "feedback": "There's no such command. The solution is to run GRANT SELECT ON ALL TABLES alongside ON FUTURE TABLES."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "What is the recommended schema design pattern to simplify access management?",
+      "choices": {
+        "a": {
+          "text": "Separate data by sensitivity level into different schemas — use schema-wide grants for analytics, per-object grants for sensitive data",
+          "feedback": "Correct! Schema-as-access-boundary: analytics data gets schema-wide future grants, sensitive/PII data lives in a restricted schema with per-object grants. This eliminates most manual grant work."
+        },
+        "b": {
+          "text": "Put all tables in one schema and use per-object grants for everything",
+          "feedback": "This works but doesn't scale. With hundreds of tables, per-object grants become an operational nightmare. Separating by sensitivity lets you use schema-wide grants for most data."
+        },
+        "c": {
+          "text": "Give all roles ACCOUNTADMIN access to avoid grant issues entirely",
+          "feedback": "This violates least privilege and is a major security risk. ACCOUNTADMIN should never be used for day-to-day work or granted broadly."
+        },
+        "d": {
+          "text": "Create a separate database for each user to avoid sharing entirely",
+          "feedback": "This defeats the purpose of a shared data platform. The goal is controlled sharing — schemas by sensitivity level with appropriate grants at each level."
+        }
+      }
+    }
+  },
+  "platform_admin": {
+    "q1": {
+      "prompt": "What is the key difference between a <strong>Managed Access schema</strong> and a normal schema?",
+      "choices": {
+        "a": {
+          "text": "In a Managed Access schema, only the schema owner can grant access — even on tables created by others",
+          "feedback": "Correct! This centralizes grant control. Engineers can still create objects, but they can't share them without the admin's approval — preventing accidental exposure of sensitive data."
+        },
+        "b": {
+          "text": "In a Managed Access schema, nobody can create tables except the schema owner",
+          "feedback": "Not quite — anyone with CREATE TABLE privilege can still create tables. The restriction is on granting, not creating."
+        },
+        "c": {
+          "text": "Managed Access schemas automatically encrypt all data at rest",
+          "feedback": "All Snowflake data is encrypted at rest regardless of schema type. Managed Access is about grant control, not encryption."
+        },
+        "d": {
+          "text": "Managed Access schemas prevent SELECT queries from non-owner roles",
+          "feedback": "Roles can still query tables if they've been granted access by the schema owner. The restriction is on who can issue GRANTs, not on who can query."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "You're doing a quarterly access review. A role has SELECT on a table but hasn't queried it in 90+ days. What should you do?",
+      "choices": {
+        "a": {
+          "text": "Cross-reference with the team, notify them of the planned revocation, then REVOKE if they confirm it's unneeded",
+          "feedback": "Correct! Best practice is: check query history, notify the affected team (\"we're revoking in 7 days unless you confirm need\"), then revoke. Revoking without warning can break things."
+        },
+        "b": {
+          "text": "REVOKE immediately — unused grants are always wrong",
+          "feedback": "Careful! Some access is precautionary (disaster recovery, quarterly reports). Always assess impact and notify before revoking in production."
+        },
+        "c": {
+          "text": "Leave it alone — better to over-grant than risk breaking something",
+          "feedback": "This is how privilege drift happens. Every unnecessary grant increases attack surface. The right approach is to verify need and revoke if truly stale."
+        },
+        "d": {
+          "text": "Delete the role entirely since it's clearly inactive",
+          "feedback": "The role may be actively used for other objects — just not this particular table. Dropping a role is far more destructive than revoking a single grant."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "Which command shows you <em>all roles that have privileges on a specific table</em>?",
+      "choices": {
+        "a": {
+          "text": "SHOW GRANTS ON TABLE x",
+          "feedback": "Correct! SHOW GRANTS ON an object lists every privilege granted on that object and which role holds it. This is your \"who can access this?\" tool."
+        },
+        "b": {
+          "text": "SHOW GRANTS TO ROLE x",
+          "feedback": "That shows what privileges a specific role has — the reverse question. You want SHOW GRANTS ON TABLE to see all roles with access to a specific object."
+        },
+        "c": {
+          "text": "SHOW GRANTS OF ROLE x",
+          "feedback": "That shows which users/parent roles hold a specific role. You want SHOW GRANTS ON TABLE to see who has access to the object."
+        },
+        "d": {
+          "text": "DESCRIBE TABLE x",
+          "feedback": "DESCRIBE shows the table's column definitions, not its access grants. Use SHOW GRANTS ON TABLE for privilege information."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "Why is <code>REVOKE</code> considered more dangerous than <code>GRANT</code> in production?",
+      "choices": {
+        "a": {
+          "text": "Because REVOKE takes effect immediately and can break downstream queries, dashboards, and pipelines the moment it's executed",
+          "feedback": "Correct! GRANT is additive (nothing breaks), but REVOKE is subtractive — it can instantly break running workloads. Always check dependencies and coordinate before revoking in production."
+        },
+        "b": {
+          "text": "Because REVOKE is irreversible — you can never re-grant the same privilege",
+          "feedback": "REVOKE is reversible — you can always GRANT the same privilege again. The danger is the immediate breakage during the window between revoke and re-grant."
+        },
+        "c": {
+          "text": "Because REVOKE requires ACCOUNTADMIN while GRANT does not",
+          "feedback": "Both GRANT and REVOKE can be issued by object owners or roles with MANAGE GRANTS. The privilege requirements are similar. The danger is operational, not privilege-based."
+        },
+        "d": {
+          "text": "Because REVOKE deletes the underlying data from the table",
+          "feedback": "REVOKE only removes the privilege — it never touches the data itself. The danger is that consumers instantly lose access to data they may depend on."
+        }
+      }
+    }
+  }
+}
