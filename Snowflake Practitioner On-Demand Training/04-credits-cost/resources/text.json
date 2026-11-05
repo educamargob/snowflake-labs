@@ -1,0 +1,130 @@
+{
+  "shared": {
+    "q1": {
+      "prompt": "Which of the following does <strong>NOT</strong> burn Snowflake credits?",
+      "choices": {
+        "a": {
+          "text": "A virtual warehouse that has auto-suspended and is sitting idle",
+          "feedback": "Correct! A suspended warehouse costs zero credits. You only pay while it is running."
+        },
+        "b": {
+          "text": "A virtual warehouse that is running but has no active query",
+          "feedback": "A running warehouse burns credits whether or not it is executing a query. Auto-suspend stops this."
+        },
+        "c": {
+          "text": "A scheduled task executing a SQL statement",
+          "feedback": "Serverless tasks have their own credit meter — they do burn credits when they execute."
+        },
+        "d": {
+          "text": "A Cortex AI function call (e.g., COMPLETE or SENTIMENT)",
+          "feedback": "Cortex AI functions are metered per token/call. They have their own credit line in ACCOUNT_USAGE."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "You want to find out which individual SQL query in your pipeline cost the most credits last week. Which ACCOUNT_USAGE view do you query?",
+      "choices": {
+        "a": {
+          "text": "QUERY_ATTRIBUTION_HISTORY",
+          "feedback": "Correct! QUERY_ATTRIBUTION_HISTORY gives per-query credit cost via the credits_attributed_compute column."
+        },
+        "b": {
+          "text": "WAREHOUSE_METERING_HISTORY",
+          "feedback": "WAREHOUSE_METERING_HISTORY aggregates credits per warehouse per hour — useful for fleet-level spend, but not per-query."
+        },
+        "c": {
+          "text": "QUERY_HISTORY",
+          "feedback": "QUERY_HISTORY shows execution details (time, rows, status) but does not include credit cost. Use QUERY_ATTRIBUTION_HISTORY for that."
+        },
+        "d": {
+          "text": "METERING_DAILY_HISTORY",
+          "feedback": "METERING_DAILY_HISTORY is a daily credit summary — still warehouse-level, not per-query."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "A teammate says: “Our fact table just crossed 4 billion rows, so we need a bigger warehouse.” Based on how this lab says to choose a starting warehouse size, what's the best response?",
+      "choices": {
+        "a": {
+          "text": "Size to the workload type and query complexity, then adjust on observed spill — row count alone doesn't set the size",
+          "feedback": "Correct! Snowflake's guidance (and this lab's workload-type table) starts from how the data is used — exploration vs. reporting vs. heavy ELT — and the bytes/complexity of the queries, not the raw row count. You pick a starting size, then tune up only if you see spilling."
+        },
+        "b": {
+          "text": "Yes — 4 billion rows always requires at least a Medium warehouse",
+          "feedback": "Row count alone doesn't determine size. A simple filtered scan over 4 B rows can run fine on a smaller warehouse; a complex multi-join over far fewer rows may need more. Start from workload type, then measure."
+        },
+        "c": {
+          "text": "Yes — jump straight to Large to be safe",
+          "feedback": "Over-provisioning wastes credits. The workload-type table gives a data-driven starting point; size up only when spill or slow execution shows you need to."
+        },
+        "d": {
+          "text": "It's impossible to choose a size without loading the whole table first",
+          "feedback": "You don't need to load it first. Pick a starting size from the workload-type table, run the real workload, and use spill + execution-time signals to adjust."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "You're unsure whether your XSMALL warehouse with AUTO_SUSPEND=60 is the right setup for a mix of ad-hoc queries and scheduled daily reports. Which CoCo skill is purpose-built to advise on warehouse sizing, Gen2 billing mechanics, and the auto-suspend vs. cache-warmth trade-off?",
+      "choices": {
+        "a": {
+          "text": "/warehouse",
+          "feedback": "Correct! The /warehouse skill has structured knowledge of Gen2 architecture, credit billing, sizing trade-offs, and auto-suspend patterns — it validates and recommends warehouse configuration."
+        },
+        "b": {
+          "text": "/cost-intelligence",
+          "feedback": "/cost-intelligence runs ACCOUNT_USAGE queries to show where credits go — it reports spend, it doesn't advise on how to configure a specific warehouse."
+        },
+        "c": {
+          "text": "/workload-performance-analysis",
+          "feedback": "That skill diagnoses query-level performance patterns (spill, pruning). Useful, but it isn't the one built to recommend warehouse size and auto-suspend settings."
+        },
+        "d": {
+          "text": "/data-quality",
+          "feedback": "/data-quality is about monitoring data correctness — unrelated to warehouse configuration."
+        }
+      }
+    },
+    "q5": {
+      "prompt": "You want CoCo to run the ACCOUNT_USAGE queries for you and give a plain-English summary of your top warehouses by credit spend, plus suggestions to reduce it. Which skill do you invoke?",
+      "choices": {
+        "a": {
+          "text": "/cost-intelligence",
+          "feedback": "Correct! /cost-intelligence generates and runs the cost queries, then summarizes spend and recommends reductions — the same data you queried by hand in Section 2, surfaced through AI."
+        },
+        "b": {
+          "text": "/warehouse",
+          "feedback": "/warehouse advises on configuring a warehouse; it doesn't pull and rank your account's credit spend."
+        },
+        "c": {
+          "text": "/workload-performance-analysis",
+          "feedback": "That skill focuses on query performance patterns, not on ranking warehouses by total credit spend."
+        },
+        "d": {
+          "text": "/lineage",
+          "feedback": "/lineage traces data dependencies between objects — it has nothing to do with cost reporting."
+        }
+      }
+    },
+    "q6": {
+      "prompt": "High credits on a warehouse often trace back to specific query patterns — missing filters, full-table scans, or spilling to disk. Which skill diagnoses those query-level patterns and links them to cost?",
+      "choices": {
+        "a": {
+          "text": "/workload-performance-analysis",
+          "feedback": "Correct! It scans QUERY_HISTORY for the top patterns by execution time and spill, then gives concrete fixes (add filters, avoid SELECT *, right-size) — connecting performance to credit cost."
+        },
+        "b": {
+          "text": "/cost-intelligence",
+          "feedback": "/cost-intelligence shows *where* credits go; it doesn't diagnose *why* at the query-pattern level. Pair it with /workload-performance-analysis for the root cause."
+        },
+        "c": {
+          "text": "/warehouse",
+          "feedback": "/warehouse advises on warehouse configuration, not on diagnosing individual query patterns."
+        },
+        "d": {
+          "text": "/search-optimization",
+          "feedback": "That skill is about the Search Optimization Service for point lookups — not general query-pattern diagnosis."
+        }
+      }
+    }
+  }
+}
