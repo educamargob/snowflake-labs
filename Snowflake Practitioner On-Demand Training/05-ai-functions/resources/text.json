@@ -1,0 +1,197 @@
+{
+  "data_analyst": {
+    "q1": {
+      "prompt": "You run <code>AI_SENTIMENT(comment)['categories'][0]['sentiment']::STRING</code> and get the value <code>negative</code>. What does this mean?",
+      "choices": {
+        "a": {
+          "text": "The AI classified the comment text as having a negative overall tone",
+          "feedback": "Correct! AI_SENTIMENT returns a structured object; the sentiment category is at ['categories'][0]['sentiment']. The value is one of: positive, negative, neutral, or mixed."
+        },
+        "b": {
+          "text": "The customer gave a negative numeric score (1 or 2)",
+          "feedback": "The numeric score column and the AI sentiment are separate signals. AI_SENTIMENT reads the text content, not the score column — they often agree but can differ."
+        },
+        "c": {
+          "text": "The comment contains profanity or inappropriate content",
+          "feedback": "AI_SENTIMENT measures emotional tone (positive/negative/neutral/mixed), not content appropriateness. Use AI_FILTER for content moderation."
+        },
+        "d": {
+          "text": "The AI couldn't parse the comment and returned an error code",
+          "feedback": "'negative' is a valid sentiment category, not an error. If parsing failed, the function would return null, not a category string."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "You run <code>AI_CLASSIFY(comment, ['Slow Service', 'Product Quality', 'Pricing', 'Other'])</code>. How do you extract the chosen label from the result?",
+      "choices": {
+        "a": {
+          "text": "<code>result['labels'][0]::STRING</code>",
+          "feedback": "Correct! AI_CLASSIFY returns a structured object; the winning label is at ['labels'][0]. Cast to STRING to use it as a plain text value."
+        },
+        "b": {
+          "text": "<code>result['category']::STRING</code>",
+          "feedback": "The key is 'labels', not 'category'. Use result['labels'][0]::STRING to get the chosen label."
+        },
+        "c": {
+          "text": "<code>result::STRING</code>",
+          "feedback": "Casting the whole object to STRING gives you raw JSON text, not the label. You need to navigate to the 'labels' key first."
+        },
+        "d": {
+          "text": "<code>result['sentiment']::STRING</code>",
+          "feedback": "'sentiment' is the key used by AI_SENTIMENT, not AI_CLASSIFY. AI_CLASSIFY uses 'labels'."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "Why is it better to <code>CREATE TABLE AS SELECT</code> (CTAS) with AI functions rather than calling them in every dashboard query?",
+      "choices": {
+        "a": {
+          "text": "AI functions bill per token — running them once and persisting the result avoids re-charging for the same computation on every query",
+          "feedback": "Correct! This is the 'compute once, query many times' pattern. AI functions cost credits each time they process tokens, so pre-computing and saving to a table is far more cost-efficient than calling them in live queries."
+        },
+        "b": {
+          "text": "AI functions are not allowed inside dashboard tools — they can only run in notebooks",
+          "feedback": "AI functions can be called anywhere SQL runs, including dashboards. The reason to persist is cost and latency, not a technical restriction."
+        },
+        "c": {
+          "text": "CTAS is required because AI functions only work on full table scans",
+          "feedback": "AI functions work on any row set — you can LIMIT or filter. The CTAS pattern is about cost efficiency, not a scan requirement."
+        },
+        "d": {
+          "text": "Dashboard tools can't read Snowflake views, so the data must be in a table",
+          "feedback": "Dashboards read views fine. The reason to persist AI results is to avoid re-running expensive AI calls on every query refresh."
+        }
+      }
+    }
+  },
+  "data_engineer": {
+    "q1": {
+      "prompt": "<code>AI_EXTRACT(description, ['origin_country', 'roast_level'])</code> returns a result. How do you access the <code>origin_country</code> value from it?",
+      "choices": {
+        "a": {
+          "text": "<code>result:response:origin_country::STRING</code>",
+          "feedback": "Correct! AI_EXTRACT wraps its output under a 'response' key. Navigate to it with semi-colon path notation: result:response:field_name::STRING."
+        },
+        "b": {
+          "text": "<code>result:origin_country::STRING</code>",
+          "feedback": "Close — but there's an extra level. AI_EXTRACT puts its fields under a 'response' key, so the path is result:response:origin_country::STRING."
+        },
+        "c": {
+          "text": "<code>result['origin_country']</code>",
+          "feedback": "Bracket notation works for some JSON paths, but AI_EXTRACT nests its fields under a 'response' key first: result:response:origin_country::STRING."
+        },
+        "d": {
+          "text": "<code>result::STRING</code>",
+          "feedback": "Casting the whole object to STRING gives you raw JSON text. You need to navigate into the 'response' key to reach individual extracted fields."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "You run <code>AI_EMBED('snowflake-arctic-embed-m-v1.5', description)::VECTOR(FLOAT, 768)</code>. What is the output and what is it used for?",
+      "choices": {
+        "a": {
+          "text": "A 768-dimensional numeric vector representing the semantic meaning of the text — used for similarity search and clustering",
+          "feedback": "Correct! Embeddings convert text into a fixed-size numeric vector. Similar texts produce vectors that are close together, enabling VECTOR_COSINE_SIMILARITY and Cortex Search to find semantically related content."
+        },
+        "b": {
+          "text": "A 768-character text summary of the description",
+          "feedback": "Embeddings are not text summaries — they're numeric vectors. Use AI_COMPLETE for text generation and summarization."
+        },
+        "c": {
+          "text": "A hash of the description for deduplication",
+          "feedback": "Hashes are fixed-length identifiers for exact matching. Embeddings are numeric vectors designed to measure semantic similarity, not identity."
+        },
+        "d": {
+          "text": "A classification label chosen from 768 possible categories",
+          "feedback": "768 is the vector dimension, not the number of categories. Use AI_CLASSIFY if you need categorical labels."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "What is the key advantage of using a Dynamic Table over a plain CTAS for an AI enrichment pipeline?",
+      "choices": {
+        "a": {
+          "text": "A Dynamic Table automatically refreshes and runs AI functions only on new or changed rows — avoiding the cost of re-processing the whole table",
+          "feedback": "Correct! A CTAS is a one-time snapshot — every refresh re-processes every row and re-pays the AI token cost. A Dynamic Table tracks changes and only processes the delta, which saves tokens and time as the dataset grows."
+        },
+        "b": {
+          "text": "A Dynamic Table runs faster because it stores data in a compressed format",
+          "feedback": "The performance advantage isn't compression — it's incremental processing. Only new/changed rows trigger AI function calls, not the whole table."
+        },
+        "c": {
+          "text": "Dynamic Tables don't require a warehouse, so they eliminate compute costs",
+          "feedback": "Dynamic Tables do require a warehouse (set via WAREHOUSE in the CREATE statement). The saving is in AI token costs — not compute costs."
+        },
+        "d": {
+          "text": "Dynamic Tables automatically translate the output into multiple languages",
+          "feedback": "Language translation is done by AI_TRANSLATE. Dynamic Tables are a scheduling/incremental-refresh mechanism, not a transformation function."
+        }
+      }
+    }
+  },
+  "platform_admin": {
+    "q1": {
+      "prompt": "You run <code>AI_REDACT(comment)</code> on a customer feedback table. What happens to the original data in the source table?",
+      "choices": {
+        "a": {
+          "text": "Nothing — AI_REDACT is non-destructive and only transforms the output at query time; the source table is unchanged",
+          "feedback": "Correct! AI_REDACT applies redaction in the query result only. The underlying table still holds the original text, so authorized roles can still see the unredacted data by querying the source directly."
+        },
+        "b": {
+          "text": "PII is permanently deleted from the source table rows",
+          "feedback": "AI_REDACT does not modify the source table. It's a query-time transformation — the original data is preserved, which is important for authorized users who still need access."
+        },
+        "c": {
+          "text": "The source table is locked until the redaction job completes",
+          "feedback": "AI_REDACT is a SQL function, not a batch job. It runs row-by-row at query time and doesn't lock the source table."
+        },
+        "d": {
+          "text": "PII is replaced with nulls in the source table",
+          "feedback": "Nulls would be a destructive change to the source. AI_REDACT replaces PII with placeholders like [NAME] only in the query output — the source remains untouched."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "<code>AI_FILTER(PROMPT('This comment is appropriate for a business report: {0}', comment))</code> returns <code>FALSE</code> for a row. What does this mean?",
+      "choices": {
+        "a": {
+          "text": "The AI evaluated the condition as false — the comment does NOT meet the criteria 'appropriate for a business report'",
+          "feedback": "Correct! AI_FILTER returns TRUE or FALSE based on whether the natural-language condition is satisfied. A FALSE result means the AI judged that this comment should be excluded by the filter."
+        },
+        "b": {
+          "text": "The function failed to process the comment and returned an error code",
+          "feedback": "FALSE is a valid result, not an error. AI_FILTER always returns TRUE or FALSE (or null if the input is null). An error would be an exception, not a boolean."
+        },
+        "c": {
+          "text": "The comment is empty or null",
+          "feedback": "A null input would return null, not FALSE. FALSE means the AI actively evaluated the condition and determined it was not satisfied."
+        },
+        "d": {
+          "text": "The comment was flagged as containing profanity and must be deleted",
+          "feedback": "AI_FILTER only returns a boolean — it doesn't trigger any deletion. Acting on the result (filtering out rows, alerting, etc.) is up to the query logic around it."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "As a Platform Admin, you want to prevent your account from using large expensive models while still allowing AI functions. What is the correct approach?",
+      "choices": {
+        "a": {
+          "text": "Revoke <code>CORTEX-MODEL-ROLE-ALL</code> from PUBLIC and grant only specific <code>CORTEX-MODEL-ROLE-&lt;model&gt;</code> roles for the approved models",
+          "feedback": "Correct! By default, CORTEX-MODEL-ROLE-ALL is granted to PUBLIC, giving everyone access to all models. Revoking it and granting only specific model roles lets you allow small models like 'llama3.1-8b' while blocking larger, more expensive ones."
+        },
+        "b": {
+          "text": "Revoke the <code>SNOWFLAKE.CORTEX_USER</code> database role from all roles — this disables all AI functions",
+          "feedback": "Revoking CORTEX_USER would disable ALL AI functions for those roles, not just expensive models. Model RBAC (CORTEX-MODEL-ROLE-* application roles) lets you keep AI functions enabled but restrict which models can be used."
+        },
+        "c": {
+          "text": "Set a budget alert threshold in ACCOUNT_USAGE — Snowflake will automatically block AI calls when the threshold is hit",
+          "feedback": "Budget alerts notify you about spending but don't automatically block calls. Model RBAC application roles proactively restrict which models can be used before any spend occurs."
+        },
+        "d": {
+          "text": "Grant <code>SNOWFLAKE.CORTEX_EMBED_USER</code> instead of <code>CORTEX_USER</code> — this blocks text generation models",
+          "feedback": "CORTEX_EMBED_USER limits users to embedding only (AI_EMBED). But if users already have CORTEX_USER, you'd need to revoke it — and this approach is per-role, not account-wide. Model RBAC (revoking CORTEX-MODEL-ROLE-ALL and granting specific model roles) is the right tool for restricting specific models globally."
+        }
+      }
+    }
+  }
+}
