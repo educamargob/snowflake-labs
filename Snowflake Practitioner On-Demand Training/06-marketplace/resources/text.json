@@ -1,0 +1,197 @@
+{
+  "data_analyst": {
+    "q1": {
+      "prompt": "What does <em>zero-copy</em> mean when you access a shared dataset in Snowflake?",
+      "choices": {
+        "a": {
+          "text": "You query the provider's live data in place — no ETL, and no storage cost on your side",
+          "feedback": "Correct! A shared database is a live window onto the provider's data. The provider maintains it; you don't copy, load, or pay to store it."
+        },
+        "b": {
+          "text": "Snowflake copies the full dataset into your own database overnight",
+          "feedback": "No copy is made — that's the whole point. The data stays with the provider and you query it live."
+        },
+        "c": {
+          "text": "You get a one-time CSV export you load with COPY INTO",
+          "feedback": "That's the loading pattern (Lab 7). Shared data needs no load — it's queried in place."
+        },
+        "d": {
+          "text": "The dataset is stored in your account but the provider is billed for storage",
+          "feedback": "Zero-copy means no data is stored in your account at all. The provider hosts it; you just query."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "A shared database called <code>ALPINE_PEAKS_PUBLISHING</code> already exists in your account. What single privilege does your role need to query tables inside it?",
+      "choices": {
+        "a": {
+          "text": "IMPORTED PRIVILEGES on the database",
+          "feedback": "Correct! One GRANT IMPORTED PRIVILEGES on the shared database unlocks all objects inside it for your role — no per-table grants needed."
+        },
+        "b": {
+          "text": "SELECT granted on each table individually",
+          "feedback": "Per-table SELECT grants work for locally-owned databases. Shared databases use IMPORTED PRIVILEGES at the database level instead."
+        },
+        "c": {
+          "text": "OWNERSHIP on the shared database",
+          "feedback": "You can't own a shared database — it belongs to the provider. IMPORTED PRIVILEGES is the correct consumer privilege."
+        },
+        "d": {
+          "text": "ACCOUNTADMIN role — only admins can query shared databases",
+          "feedback": "Not true. An admin grants IMPORTED PRIVILEGES to a custom role, which is exactly what the stored procedure in this lab does."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "A supplier wants to share their weekly price list with exactly three of their distribution partners. Which Snowflake feature fits this use case best?",
+      "choices": {
+        "a": {
+          "text": "Private Listing — share directly with specific invited accounts",
+          "feedback": "Correct! A Private Listing is designed for curated, account-specific sharing. The provider invites only the accounts they choose — it's not visible on the public Marketplace."
+        },
+        "b": {
+          "text": "Public Marketplace listing — publish it so anyone on Snowflake can find it",
+          "feedback": "A public listing is visible to all Snowflake users. For a price list shared with specific partners, a Private Listing keeps it confidential."
+        },
+        "c": {
+          "text": "COPY INTO — export the data as CSV files and email them to partners",
+          "feedback": "That's a manual pipeline that creates stale copies. A Private Listing lets partners query live data with no exports or email chains."
+        },
+        "d": {
+          "text": "CLONE the table into each partner's account",
+          "feedback": "Cloning works within one account. A Private Listing is the right tool for cross-account, zero-copy distribution."
+        }
+      }
+    }
+  },
+  "data_engineer": {
+    "q1": {
+      "prompt": "What does <em>zero-copy</em> mean when you access a shared dataset in Snowflake?",
+      "choices": {
+        "a": {
+          "text": "You query the provider's live data in place — no ETL, and no storage cost on your side",
+          "feedback": "Correct! A shared database is a live window onto the provider's data. The provider maintains it; you don't copy, load, or pay to store it."
+        },
+        "b": {
+          "text": "Snowflake copies the full dataset into your own database overnight",
+          "feedback": "No copy is made — that's the whole point. The data stays with the provider and you query it live."
+        },
+        "c": {
+          "text": "You get a one-time CSV export you load with COPY INTO",
+          "feedback": "That's the loading pattern (Lab 7). Shared data needs no load — it's queried in place."
+        },
+        "d": {
+          "text": "The dataset is stored in your account but the provider is billed for storage",
+          "feedback": "Zero-copy means no data is stored in your account at all. The provider hosts it; you just query."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "A shared database called <code>ALPINE_PEAKS_PUBLISHING</code> already exists in your account. What single privilege does your role need to query tables inside it?",
+      "choices": {
+        "a": {
+          "text": "IMPORTED PRIVILEGES on the database",
+          "feedback": "Correct! One GRANT IMPORTED PRIVILEGES on the shared database unlocks all objects inside it for your role — no per-table grants needed."
+        },
+        "b": {
+          "text": "SELECT granted on each table individually",
+          "feedback": "Per-table SELECT grants work for locally-owned databases. Shared databases use IMPORTED PRIVILEGES at the database level instead."
+        },
+        "c": {
+          "text": "OWNERSHIP on the shared database",
+          "feedback": "You can't own a shared database — it belongs to the provider. IMPORTED PRIVILEGES is the correct consumer privilege."
+        },
+        "d": {
+          "text": "ACCOUNTADMIN role — only admins can query shared databases",
+          "feedback": "Not true. An admin grants IMPORTED PRIVILEGES to a custom role, which is exactly what the stored procedure in this lab does."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "You create a view in your own database that selects from a table in a privately shared database. What's true about that view?",
+      "choices": {
+        "a": {
+          "text": "It's still zero-copy — the view stores only its definition and reads the provider's live data on each query",
+          "feedback": "Correct! A view stores no rows. It reads the shared table live every time, so downstream consumers get a curated, always-current interface with no extra storage."
+        },
+        "b": {
+          "text": "It copies the shared rows into your database when created",
+          "feedback": "No — a view never stores rows. It holds only the query definition and reads the underlying (shared) data at query time."
+        },
+        "c": {
+          "text": "It will break the moment the provider updates their data",
+          "feedback": "The opposite — the view always reflects the provider's current data. It only needs changing if the provider alters the columns it references."
+        },
+        "d": {
+          "text": "You must own the shared database to build a view over it",
+          "feedback": "You can't own a shared database. IMPORTED PRIVILEGES on it is enough to build a view over its tables in your own database."
+        }
+      }
+    }
+  },
+  "platform_admin": {
+    "q1": {
+      "prompt": "What does <em>zero-copy</em> mean when you access a shared dataset in Snowflake?",
+      "choices": {
+        "a": {
+          "text": "You query the provider's live data in place — no ETL, and no storage cost on your side",
+          "feedback": "Correct! A shared database is a live window onto the provider's data. The provider maintains it; you don't copy, load, or pay to store it."
+        },
+        "b": {
+          "text": "Snowflake copies the full dataset into your own database overnight",
+          "feedback": "No copy is made — that's the whole point. The data stays with the provider and you query it live."
+        },
+        "c": {
+          "text": "You get a one-time CSV export you load with COPY INTO",
+          "feedback": "That's the loading pattern (Lab 7). Shared data needs no load — it's queried in place."
+        },
+        "d": {
+          "text": "The dataset is stored in your account but the provider is billed for storage",
+          "feedback": "Zero-copy means no data is stored in your account at all. The provider hosts it; you just query."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "A shared database called <code>ALPINE_PEAKS_PUBLISHING</code> already exists in your account. What single privilege does your role need to query tables inside it?",
+      "choices": {
+        "a": {
+          "text": "IMPORTED PRIVILEGES on the database",
+          "feedback": "Correct! One GRANT IMPORTED PRIVILEGES on the shared database unlocks all objects inside it for your role — no per-table grants needed."
+        },
+        "b": {
+          "text": "SELECT granted on each table individually",
+          "feedback": "Per-table SELECT grants work for locally-owned databases. Shared databases use IMPORTED PRIVILEGES at the database level instead."
+        },
+        "c": {
+          "text": "OWNERSHIP on the shared database",
+          "feedback": "You can't own a shared database — it belongs to the provider. IMPORTED PRIVILEGES is the correct consumer privilege."
+        },
+        "d": {
+          "text": "ACCOUNTADMIN role — only admins can query shared databases",
+          "feedback": "Not true. An admin grants IMPORTED PRIVILEGES to a custom role, which is exactly what the stored procedure in this lab does."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "You acquired a privately shared database and granted your role IMPORTED PRIVILEGES. As the consumer admin, what do you control?",
+      "choices": {
+        "a": {
+          "text": "Which roles inside your account can read the shared database",
+          "feedback": "Correct! The provider controls what's in the share and can revoke it; you (the consumer admin) control who inside your account can read it, by granting IMPORTED PRIVILEGES to roles."
+        },
+        "b": {
+          "text": "Which tables and columns the provider includes in the share",
+          "feedback": "That's the provider's call. As the consumer you can't add objects to the share — you only govern internal access to what's shared."
+        },
+        "c": {
+          "text": "The provider's storage and compute costs for the shared data",
+          "feedback": "The provider hosts and pays for the data. Your control is limited to who in your account may query it."
+        },
+        "d": {
+          "text": "Nothing — once shared, access is fully automatic for every role",
+          "feedback": "Not automatic. A role sees the shared database only after you grant it IMPORTED PRIVILEGES — that's exactly the control you hold."
+        }
+      }
+    }
+  }
+}
