@@ -1,0 +1,53 @@
+product_id,product_name,category,origin_country,cost_per_unit,active
+101,Ethiopian Yirgacheffe Light Roast,Single Origin Beans,Ethiopia,18.50,TRUE
+102,Colombian Supremo Medium Roast,Single Origin Beans,Colombia,16.75,TRUE
+103,Brazilian Santos Dark Roast,Single Origin Beans,Brazil,14.25,TRUE
+104,Guatemalan Antigua Medium Roast,Single Origin Beans,Guatemala,17.00,TRUE
+105,Kenyan AA Light Roast,Single Origin Beans,Kenya,21.50,TRUE
+106,Costa Rican Tarrazu Medium Roast,Single Origin Beans,Costa Rica,19.00,TRUE
+107,Sumatra Mandheling Dark Roast,Single Origin Beans,Indonesia,15.50,TRUE
+108,Vietnamese Robusta Dark Roast,Single Origin Beans,Vietnam,11.25,TRUE
+109,Peruvian Organic Light Roast,Single Origin Beans,Peru,20.00,TRUE
+110,Honduran San Marcos Medium Roast,Single Origin Beans,Honduras,13.75,TRUE
+201,Roastery House Blend,Blends,Colombia,15.00,TRUE
+202,Morning Ritual Blend,Blends,Brazil,14.50,TRUE
+203,Dark Muse Espresso Blend,Blends,Ethiopia,16.00,TRUE
+204,Weekend Reserve Blend,Blends,Guatemala,17.50,TRUE
+205,Smooth Operator Blend,Blends,Colombia,13.50,TRUE
+206,Heritage Blend Classic,Blends,Brazil,12.75,TRUE
+207,Black Forest Blend,Blends,Indonesia,14.00,TRUE
+208,Pacific Coast Blend,Blends,Vietnam,12.25,TRUE
+301,Original Cold Brew Concentrate,Cold Brew,Colombia,22.00,TRUE
+302,Vanilla Cold Brew,Cold Brew,Brazil,24.50,TRUE
+303,Nitro Cold Brew Can,Cold Brew,Ethiopia,26.00,TRUE
+304,Black Honey Cold Brew,Cold Brew,Guatemala,23.75,TRUE
+305,Classic Cold Brew Ready-to-Drink,Cold Brew,Colombia,19.50,TRUE
+401,Single-Shot Espresso Pods 10pk,Espresso,Ethiopia,12.00,TRUE
+402,Double Espresso Pods 10pk,Espresso,Colombia,13.50,TRUE
+403,Lungo Pods 10pk,Espresso,Brazil,11.75,TRUE
+404,Ristretto Pods 10pk,Espresso,Guatemala,14.25,TRUE
+405,Espresso Ground 250g,Espresso,Kenya,16.00,TRUE
+501,Manual Burr Grinder,Equipment,Germany,89.99,TRUE
+502,Stainless Steel French Press 1L,Equipment,China,34.99,TRUE
+503,Pour-Over Dripper Kit,Equipment,Japan,44.99,TRUE
+504,Reusable Cold Brew Pitcher 1.5L,Equipment,USA,49.99,TRUE
+505,Travel Espresso Maker,Equipment,Italy,59.99,FALSE
+506,Electric Milk Frother,Equipment,Germany,29.99,TRUE
+507,Digital Coffee Scale,Equipment,Japan,39.99,TRUE
+508,AeroPress Kit,Equipment,USA,37.99,TRUE
+509,Moka Pot 6-Cup,Equipment,Italy,32.50,TRUE
+510,V60 Ceramic Dripper,Equipment,Japan,28.00,TRUE
+601,Roastery Logo Mug 12oz,Merchandise,China,14.99,TRUE
+602,Roastery Insulated Tumbler 16oz,Merchandise,China,24.99,TRUE
+603,Canvas Tote Bag,Merchandise,India,12.99,TRUE
+604,Roastery Apron,Merchandise,India,19.99,TRUE
+605,Gift Card 25,Merchandise,USA,25.00,TRUE
+606,Gift Card 50,Merchandise,USA,50.00,TRUE
+607,Gift Card 100,Merchandise,USA,100.00,TRUE
+608,Roastery Cap,Merchandise,Bangladesh,11.99,TRUE
+609,Coffee Journal Notebook,Merchandise,China,9.99,TRUE
+610,Subscription Box Q1 Sampler,Merchandise,USA,42.00,FALSE
+701,Decaf Colombian Medium Roast,Single Origin Beans,Colombia,17.25,TRUE
+702,Decaf Brazilian Dark Roast,Single Origin Beans,Brazil,15.75,TRUE
+511,Chemex Pour-Over 6-Cup,Equipment,USA,N/A,TRUE
+703,Swiss Water Decaf Blend,Blends,Colombia,PENDING,TRUE

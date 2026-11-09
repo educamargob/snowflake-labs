@@ -1,0 +1,239 @@
+{
+  "data_analyst": {
+    "q1": {
+      "prompt": "You run <code>SELECT $1 FROM @my_stage/products.csv LIMIT 5</code> and row 1 shows the unparsed string <em>product_id,product_name,cost</em>. What does this mean for your FILE FORMAT?",
+      "choices": {
+        "a": {
+          "text": "The file has a header row — use SKIP_HEADER=1 so COPY INTO doesn't load the header as data",
+          "feedback": "Correct! The first row contains column names, not data. SKIP_HEADER=1 in the FILE FORMAT tells COPY INTO to ignore it."
+        },
+        "b": {
+          "text": "The file doesn't need a FILE FORMAT — Snowflake auto-detects headers",
+          "feedback": "Snowflake does not auto-detect headers by default. Without SKIP_HEADER=1, that header row will be loaded as a data row."
+        },
+        "c": {
+          "text": "Use SKIP_HEADER=0 because the header tells you the column order",
+          "feedback": "SKIP_HEADER=0 is the default — it means don't skip anything. That would load the header row as data, likely causing a type error on numeric columns."
+        },
+        "d": {
+          "text": "The SELECT $1 result proves the data will load correctly with any FILE FORMAT",
+          "feedback": "SELECT $1 gives a raw preview — it shows what's in the file, not whether it will load cleanly. The FILE FORMAT still needs to match the file structure."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "You COPY INTO a table where <code>cost_per_unit</code> is a FLOAT, but two rows in the file contain <code>N/A</code> in that column. You did not set <code>ON_ERROR</code>. What happens?",
+      "choices": {
+        "a": {
+          "text": "The entire load aborts and nothing is written — ABORT_STATEMENT is the default, so the table is left unchanged",
+          "feedback": "Correct! By default COPY INTO uses ON_ERROR=ABORT_STATEMENT — one bad row rejects the whole load. Nothing lands in the table, so you never end up with a half-loaded, untrustworthy result."
+        },
+        "b": {
+          "text": "Only the two bad rows are skipped; the rest load successfully",
+          "feedback": "That's the behaviour of ON_ERROR=CONTINUE, which you'd have to set explicitly. The default is to abort the entire load."
+        },
+        "c": {
+          "text": "The N/A values load as NULL and everything succeeds",
+          "feedback": "N/A is text, not a valid FLOAT. Snowflake raises a type error rather than silently converting it — and by default that aborts the load."
+        },
+        "d": {
+          "text": "Snowflake auto-converts N/A to 0 and loads all rows",
+          "feedback": "Snowflake never invents values. A text value in a numeric column is an error, and the default is to abort the load."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "You already created <code>CSV_FMT</code> to load the loyalty file. The supplier catalog is another comma-delimited CSV with a header row. What's the best next step?",
+      "choices": {
+        "a": {
+          "text": "Reuse CSV_FMT in the supplier COPY INTO — a FILE FORMAT works for any file with the same structure",
+          "feedback": "Correct! A FILE FORMAT describes structure (delimiter, header, null handling), not a specific file. Both files are comma-delimited CSVs with a header, so one format serves both — define once, reuse everywhere."
+        },
+        "b": {
+          "text": "Create a brand-new FILE FORMAT for every file you load",
+          "feedback": "Unnecessary. If the structure matches, reuse the existing format. Creating a new one per file just adds clutter."
+        },
+        "c": {
+          "text": "You can't reuse it — a FILE FORMAT is tied to the table it was first used with",
+          "feedback": "A FILE FORMAT isn't bound to any table. It's an independent object you can reference from any COPY INTO."
+        },
+        "d": {
+          "text": "You must recreate the format because the two files have different column names",
+          "feedback": "Column names don't affect a CSV file format — only structural things like the delimiter and header row do. Both files share that structure, so CSV_FMT applies."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "When you filled in the CREATE TABLE column types, you picked types like <code>INT</code> and <code>VARCHAR</code>. Which statement about Snowflake data types is TRUE?",
+      "choices": {
+        "a": {
+          "text": "INT, INTEGER, BIGINT and NUMBER are synonyms — Snowflake stores them identically as NUMBER(38,0)",
+          "feedback": "Correct! Snowflake has one underlying numeric type, NUMBER. INT, INTEGER, BIGINT, SMALLINT, TINYINT and BYTEINT all resolve to NUMBER(38,0), so choosing INT vs INTEGER makes no difference to how the value is stored."
+        },
+        "b": {
+          "text": "VARCHAR and STRING are different types — STRING holds more characters than VARCHAR",
+          "feedback": "No — VARCHAR, STRING, TEXT, CHAR and CHARACTER are all synonyms for the same variable-length text type. STRING is simply an alias for VARCHAR; neither holds more than the other."
+        },
+        "c": {
+          "text": "You must write NUMBER — INT and INTEGER are not valid keywords in Snowflake",
+          "feedback": "All of INT, INTEGER, BIGINT, SMALLINT and NUMBER are valid — they're synonyms. Snowflake accepts any of them and stores the result the same way."
+        },
+        "d": {
+          "text": "FLOAT and INTEGER are synonyms and store values the same way",
+          "feedback": "No — FLOAT stores approximate floating-point values, while INTEGER (a NUMBER synonym) stores exact whole numbers. They are different types and are not interchangeable."
+        }
+      }
+    },
+    "q5": {
+      "prompt": "Your <code>COPY INTO</code> aborts with <em>'Numeric value NOT_A_NUMBER is not recognized'</em> on the <code>cost_per_unit</code> (FLOAT) column. The file came from a supplier. What's the best next step?",
+      "choices": {
+        "a": {
+          "text": "Treat it as a source-data problem — send the file back to the supplier to fix the bad rows rather than masking the error",
+          "feedback": "Correct! The SQL and file format are fine — the file contains invalid data. The right fix is at the source: ask the supplier to correct the bad rows and resend. A clean rejection is more trustworthy than a partial load you can't fully account for."
+        },
+        "b": {
+          "text": "Change the column type to VARCHAR so the text value loads without error",
+          "feedback": "Changing the column type to VARCHAR would hide the problem, not fix it. You'd end up with text values like 'NOT_A_NUMBER' where you need numbers — any downstream calculation or join on that column would silently produce wrong results."
+        },
+        "c": {
+          "text": "Set ON_ERROR=CONTINUE so the bad rows are skipped and the rest load successfully",
+          "feedback": "ON_ERROR=CONTINUE would let you load the clean rows, but you'd end up with a partial table that's missing rows — and no easy way to know which ones. A clean rejection you can explain is safer than a partial load you can't account for."
+        },
+        "d": {
+          "text": "Delete the FILE FORMAT and let Snowflake auto-detect the column types on the next load",
+          "feedback": "Snowflake does not auto-detect column types from staged files. The FILE FORMAT controls delimiter and header handling, not type inference. The table schema — including the FLOAT column — is what enforces the type, and that's correct."
+        }
+      }
+    }
+  },
+  "data_engineer": {
+    "q1": {
+      "prompt": "You use <code>ON_ERROR=CONTINUE</code> to load a file with 3 bad rows out of 100. After the load, your table has 97 rows. What should you do next in a production pipeline?",
+      "choices": {
+        "a": {
+          "text": "Check COPY_HISTORY or query the row count, log the 3 skipped rows, and alert the data source owner to fix them",
+          "feedback": "Correct! ON_ERROR=CONTINUE is not set-and-forget — silent skips create data quality debt. Always log and alert on skipped rows."
+        },
+        "b": {
+          "text": "Nothing — ON_ERROR=CONTINUE means the load succeeded",
+          "feedback": "The load command succeeded, but your table is missing 3 rows. In a pipeline that stakeholders rely on, those missing rows need to be tracked and backfilled."
+        },
+        "c": {
+          "text": "Re-run the load with ON_ERROR=ABORT_STATEMENT to get all 100 rows",
+          "feedback": "ABORT_STATEMENT would reject the entire file because of the 3 bad rows — you'd end up with 0 new rows instead of 97. Fix the source data first."
+        },
+        "d": {
+          "text": "Use VALIDATION_MODE=RETURN_ALL_ERRORS to find the 3 bad rows and add them manually",
+          "feedback": "VALIDATION_MODE is a dry-run diagnostic — useful before a load, not after. After an ON_ERROR=CONTINUE load, use COPY_HISTORY or row-count reconciliation to find what was skipped."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "You have JSON stored in a VARIANT column with this structure: <code>{\"event_type\": \"purchase\", \"metadata\": {\"score\": 4}}</code>. Which expression extracts the score as an integer?",
+      "choices": {
+        "a": {
+          "text": "<code>v:metadata.score::INT</code>",
+          "feedback": "Correct! The colon-dot path notation traverses nested JSON fields. The ::INT cast converts the extracted value to an integer."
+        },
+        "b": {
+          "text": "<code>v['metadata']['score']</code>",
+          "feedback": "Bracket access actually works in Snowflake too, but this lab uses colon-dot path notation: v:metadata.score::INT."
+        },
+        "c": {
+          "text": "<code>JSON_EXTRACT(v, '$.metadata.score')</code>",
+          "feedback": "JSON_EXTRACT is MySQL/SQLite syntax. Snowflake uses colon-dot path notation on VARIANT columns: v:metadata.score."
+        },
+        "d": {
+          "text": "<code>PARSE_JSON(v):metadata:score::INT</code>",
+          "feedback": "PARSE_JSON converts a VARCHAR string to VARIANT. If v is already a VARIANT column, wrapping it in PARSE_JSON is unnecessary and will cause an error."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "You created a task with <code>SCHEDULE = '15 MINUTE'</code>, but it never seems to run on its own. What's the most likely reason?",
+      "choices": {
+        "a": {
+          "text": "A new task is created SUSPENDED — it won't run on its schedule until you ALTER TASK ... RESUME",
+          "feedback": "Correct! Every task starts suspended so it can't fire before you're ready. RESUME activates the schedule; SUSPEND pauses it. (In this lab we left it suspended on purpose and used EXECUTE TASK to fire a single run on demand.)"
+        },
+        "b": {
+          "text": "The warehouse assigned to the task is offline",
+          "feedback": "If the warehouse is suspended, Snowflake auto-resumes it when the task runs. A suspended warehouse won't block task execution — but a suspended task will. The task itself must be RESUMEd."
+        },
+        "c": {
+          "text": "SCHEDULE='15 MINUTE' is not valid syntax — you must use a CRON expression",
+          "feedback": "Both '15 MINUTE' (interval) and CRON expressions are valid Snowflake task schedule formats. '15 MINUTE' is a valid interval schedule. The issue isn't the schedule syntax — it's that the task is still in SUSPENDED state."
+        },
+        "d": {
+          "text": "You need to grant EXECUTE TASK to your role before it will run automatically",
+          "feedback": "The EXECUTE TASK privilege is required to create and manually execute tasks, but it doesn't control whether a resumed task runs on its schedule. A task with a valid schedule will run once RESUMEd, assuming the privilege was granted when you created it. The actual blocker here is that the task is still SUSPENDED."
+        }
+      }
+    }
+  },
+  "platform_admin": {
+    "q1": {
+      "prompt": "A data team member says: <em>\"I can see the stage in SHOW STAGES but I get 'Object does not exist or not authorized' when I try to LIST it.\"</em> What is the most likely cause?",
+      "choices": {
+        "a": {
+          "text": "Their role has USAGE on the schema but is missing READ on the stage — schema USAGE and stage READ are separate grants",
+          "feedback": "Correct! Schema USAGE lets a role see that the stage exists. Stage READ is a separate privilege required to actually list or use the stage. Both are needed."
+        },
+        "b": {
+          "text": "The stage was created after their role was granted schema USAGE — future grants don't apply retroactively",
+          "feedback": "Future grants (GRANT READ ON FUTURE STAGES) do apply to stages created after the grant was made. But the more likely issue here is simply that READ was never granted at all."
+        },
+        "c": {
+          "text": "They need ACCOUNTADMIN to list an external stage",
+          "feedback": "Any role with READ on the stage can LIST it. ACCOUNTADMIN is not required."
+        },
+        "d": {
+          "text": "LIST requires WRITE privilege, not READ",
+          "feedback": "LIST requires READ privilege (or ownership). WRITE is for uploading files with PUT."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "You run <code>COPY INTO my_table ... VALIDATION_MODE=RETURN_ALL_ERRORS</code> and see 5 errors. You then query <code>INFORMATION_SCHEMA.COPY_HISTORY</code> and find no entry for that load. Why?",
+      "choices": {
+        "a": {
+          "text": "VALIDATION_MODE is a dry-run — it never commits data or records a load history entry",
+          "feedback": "Correct! COPY_HISTORY only records committed loads. A VALIDATION_MODE run leaves no data and no audit trail — by design."
+        },
+        "b": {
+          "text": "COPY_HISTORY has a 1-hour delay before new entries appear",
+          "feedback": "COPY_HISTORY entries appear within a few minutes of a successful load. The absence of an entry means the load didn't commit — which is exactly what VALIDATION_MODE does."
+        },
+        "c": {
+          "text": "COPY_HISTORY only records loads that succeeded with 0 errors",
+          "feedback": "COPY_HISTORY records all committed loads including those with errors (e.g. ON_ERROR=CONTINUE loads with skipped rows). It doesn't record VALIDATION_MODE dry-runs."
+        },
+        "d": {
+          "text": "You need to query ACCOUNT_USAGE.COPY_HISTORY instead — INFORMATION_SCHEMA only shows future loads",
+          "feedback": "Both INFORMATION_SCHEMA.COPY_HISTORY and ACCOUNT_USAGE.COPY_HISTORY record past loads. Neither will show a VALIDATION_MODE run because nothing was committed."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "A supplier CSV fails to load with <code>Number of columns in file (7) does not match that of the corresponding table (6)</code>. Looking at the raw file, one product name is <code>Chemex Pour-Over, 6-Cup</code> — wrapped in double quotes. What is the correct fix to the FILE FORMAT?",
+      "choices": {
+        "a": {
+          "text": "Add FIELD_OPTIONALLY_ENCLOSED_BY = '\"' so quoted fields containing the delimiter are treated as a single value",
+          "feedback": "Correct! The comma inside the quoted product name is being read as a field delimiter, splitting one column into two. FIELD_OPTIONALLY_ENCLOSED_BY = '\"' tells Snowflake that double-quoted text is a single field, even if it contains commas."
+        },
+        "b": {
+          "text": "Set ERROR_ON_COLUMN_COUNT_MISMATCH = FALSE so the load stops erroring",
+          "feedback": "This is the dangerous 'fix'. It silences the error, but the row still gets split on the embedded comma — so the data loads MISALIGNED (values shifted into the wrong columns) and truncated. You've turned a loud failure into silent corruption. Fix the root cause with FIELD_OPTIONALLY_ENCLOSED_BY."
+        },
+        "c": {
+          "text": "Change FIELD_DELIMITER to a semicolon",
+          "feedback": "The file is comma-delimited — changing the delimiter Snowflake looks for would break every row, not just the quoted ones. The real issue is that a legitimate comma lives inside a quoted field."
+        },
+        "d": {
+          "text": "Add a 7th column to the target table to absorb the extra field",
+          "feedback": "The 'extra' column isn't real data — it's half of a product name that got split by the embedded comma. Adding a column would permanently mangle the name across two columns. Handle the quoting instead."
+        }
+      }
+    }
+  }
+}

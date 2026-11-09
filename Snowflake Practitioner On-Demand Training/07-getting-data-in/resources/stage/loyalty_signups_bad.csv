@@ -1,0 +1,4 @@
+customer_id\,signup_date\,channel
+1\,2024-01-10\,app
+NOT_A_NUMBER\,2024-01-11\,web
+3\,2024-01-12\,in-store
