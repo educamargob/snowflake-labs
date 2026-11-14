@@ -1,0 +1,260 @@
+{
+  "data_analyst": {
+    "q1": {
+      "prompt": "What is Snowflake's default Time Travel retention period on a Standard account?",
+      "choices": {
+        "a": {
+          "text": "1 day",
+          "feedback": "Correct! The default is 1 day. Enterprise Edition and above can set up to 90 days per object with DATA_RETENTION_TIME_IN_DAYS."
+        },
+        "b": {
+          "text": "90 days for every account",
+          "feedback": "Not quite — 90 days is the maximum on Enterprise Edition and above, not the default. The default is 1 day."
+        },
+        "c": {
+          "text": "Forever — Snowflake never deletes history",
+          "feedback": "No — Time Travel only covers a retention window. Beyond it, history leaves Time Travel (and briefly enters Snowflake-managed Fail-safe)."
+        },
+        "d": {
+          "text": "Only until the session ends",
+          "feedback": "No — retention is measured in days and survives your session. The default is 1 day."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "You ran a bad <code>DELETE</code> and captured its query id. Which clause shows the table exactly as it was <em>immediately before</em> that statement?",
+      "choices": {
+        "a": {
+          "text": "BEFORE(statement => '<query_id>')",
+          "feedback": "Correct! BEFORE(statement => ...) anchors to the state right before a specific statement — ideal when you know which query caused the damage."
+        },
+        "b": {
+          "text": "AFTER(statement => '<query_id>')",
+          "feedback": "There is no AFTER clause. Use BEFORE(statement => ...) to see the state just before a statement ran."
+        },
+        "c": {
+          "text": "AT(offset => 60)",
+          "feedback": "A positive offset points into the future, which isn't valid. Offsets are negative seconds (e.g. -60), and here BEFORE(statement=>) is the precise tool."
+        },
+        "d": {
+          "text": "ROLLBACK",
+          "feedback": "ROLLBACK only undoes an open transaction. Once a DELETE is committed, you recover with Time Travel (AT / BEFORE), not ROLLBACK."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "Why is <code>CREATE TABLE ... CLONE ... BEFORE(statement => ...)</code> the recommended way to recover an older state?",
+      "choices": {
+        "a": {
+          "text": "It makes a zero-copy clone of the good state you can inspect before swapping it in — without duplicating storage",
+          "feedback": "Correct! Cloning is instant and zero-copy (storage is shared until data diverges), so you can verify the recovered table before touching the live one."
+        },
+        "b": {
+          "text": "It permanently disables Time Travel on the table",
+          "feedback": "No — cloning doesn't disable Time Travel. It creates a separate object you can inspect and then rename into place."
+        },
+        "c": {
+          "text": "It physically copies every row, which is why it's slow but safe",
+          "feedback": "The opposite — a clone is zero-copy and near-instant. Storage is only consumed as the clone and source diverge."
+        },
+        "d": {
+          "text": "It emails your admin to restore a backup",
+          "feedback": "No backups or admins are involved. Time Travel recovery is self-service and built in."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "You accidentally ran <code>DROP TABLE ORDERS_ANALYSIS</code> — the whole table, not just some rows. Still inside the retention window, what's the fastest way to get it back?",
+      "choices": {
+        "a": {
+          "text": "UNDROP TABLE ORDERS_ANALYSIS",
+          "feedback": "Correct! UNDROP restores a dropped table (or schema/database) in one line, as long as you're still within the retention window. AT/BEFORE and CLONE recover row-level changes; UNDROP recovers a dropped object."
+        },
+        "b": {
+          "text": "Re-run CREATE TABLE ... AS SELECT from the shared source",
+          "feedback": "That rebuilds a table from the source, but it isn't Time Travel recovery — and it only matches if the source is unchanged. For a dropped object, UNDROP is the direct, exact restore."
+        },
+        "c": {
+          "text": "Contact Snowflake Support to restore it from Fail-safe",
+          "feedback": "Fail-safe is only for data past the retention window and is Support-only. A freshly dropped table is still in Time Travel — use UNDROP yourself."
+        },
+        "d": {
+          "text": "Nothing — a dropped table is deleted immediately and permanently",
+          "feedback": "No — a DROP is recoverable within the retention window. UNDROP TABLE brings it right back."
+        }
+      }
+    }
+  },
+  "data_engineer": {
+    "q1": {
+      "prompt": "A pipeline ran <code>INSERT OVERWRITE</code> on a staging table with a bad source, replacing all good rows. Within the retention window, how do you recover the prior state?",
+      "choices": {
+        "a": {
+          "text": "Query the table BEFORE(statement => '<overwrite_query_id>') and clone that state back",
+          "feedback": "Correct! INSERT OVERWRITE replaces rows but the prior version stays in Time Travel. BEFORE(statement => ...) anchors to the state just before the overwrite, and you clone it back."
+        },
+        "b": {
+          "text": "Nothing — INSERT OVERWRITE permanently discards the old rows",
+          "feedback": "Not so — the pre-overwrite version is retained in Time Travel for the retention window and is fully recoverable."
+        },
+        "c": {
+          "text": "Re-run the pipeline and hope the source is fixed",
+          "feedback": "That doesn't restore what was lost if the source is still wrong. Time Travel recovers the exact prior state deterministically."
+        },
+        "d": {
+          "text": "Open a Snowflake Support ticket to restore from Fail-safe",
+          "feedback": "Fail-safe is a last resort after the Time Travel window closes. Within retention, you recover yourself with AT/BEFORE — no ticket."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "Why is a point-in-time <code>CLONE</code> well suited to building a backfill from a past state?",
+      "choices": {
+        "a": {
+          "text": "It's zero-copy and near-instant — you get a full copy of the historical state without duplicating storage",
+          "feedback": "Correct! A clone shares storage with its source until they diverge, so cloning yesterday's state to re-derive a downstream table is cheap and fast."
+        },
+        "b": {
+          "text": "It streams every row through the warehouse, which guarantees freshness",
+          "feedback": "A clone doesn't copy rows — it's a metadata operation (zero-copy). That's exactly why it's fast and storage-light."
+        },
+        "c": {
+          "text": "It permanently freezes the source table so it can't change",
+          "feedback": "Cloning doesn't lock or freeze the source. It creates an independent object you can work with."
+        },
+        "d": {
+          "text": "It automatically reruns all downstream tasks",
+          "feedback": "A clone just materialises the historical state. Re-deriving downstream tables is a separate step you control."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "Your staging table's data retention is the default. How long do you have to self-recover a bad load with Time Travel before it leaves the window?",
+      "choices": {
+        "a": {
+          "text": "1 day (default) — extendable up to 90 days on Enterprise+ via DATA_RETENTION_TIME_IN_DAYS",
+          "feedback": "Correct! The default retention is 1 day. Raise DATA_RETENTION_TIME_IN_DAYS (up to 90 on Enterprise+) on tables whose loads you may need to recover further back."
+        },
+        "b": {
+          "text": "Unlimited — Time Travel never expires",
+          "feedback": "No — Time Travel is bounded by the retention period. After it, data briefly enters Snowflake-managed Fail-safe, not self-service Time Travel."
+        },
+        "c": {
+          "text": "Until the warehouse suspends",
+          "feedback": "Retention is measured in days and is independent of warehouse state. The default is 1 day."
+        },
+        "d": {
+          "text": "7 days on every account",
+          "feedback": "The default is 1 day, not 7. You can raise it up to 90 on Enterprise+ per object."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "After a bad <code>INSERT OVERWRITE</code> clobbered <code>ORDERS_STAGING</code>, why clone the pre-overwrite state into a <em>new</em> table, verify it, and only then swap it in — instead of recovering straight over the live table?",
+      "choices": {
+        "a": {
+          "text": "Cloning to a separate table lets you verify the recovered rows before you touch the live table; the DROP + RENAME swap then puts good data back under the same name downstream jobs already read",
+          "feedback": "Correct! Verify-then-swap means you never overwrite the live object until you're sure, and renaming the good clone into place keeps the object name downstream depends on."
+        },
+        "b": {
+          "text": "It's required syntax — you can't apply BEFORE(...) directly to the live table",
+          "feedback": "Not true — you can query the live table with BEFORE(...). The clone-verify-swap pattern is about safety and keeping the object name stable, not a syntax limit."
+        },
+        "c": {
+          "text": "Cloning permanently locks ORDERS_STAGING so no other job can overwrite it again",
+          "feedback": "A clone doesn't lock or freeze the source. The live table stays writable; the pattern just protects you until you've verified the recovery."
+        },
+        "d": {
+          "text": "Recovering in place is impossible — Time Travel can only write to brand-new tables",
+          "feedback": "Time Travel can recover into the same table too. The point of clone-verify-swap is to confirm the good state before replacing live data."
+        }
+      }
+    }
+  },
+  "platform_admin": {
+    "q1": {
+      "prompt": "A cleanup script accidentally ran <code>DROP SCHEMA</code> on a live schema minutes ago. What's the fastest recovery within the retention window?",
+      "choices": {
+        "a": {
+          "text": "UNDROP SCHEMA — it instantly restores the schema and all objects inside it",
+          "feedback": "Correct! UNDROP works at table, schema, and database scope. UNDROP SCHEMA brings the whole schema back with its contents — no rebuild needed."
+        },
+        "b": {
+          "text": "Recreate the schema and reload every table by hand",
+          "feedback": "Slow and error-prone. Within retention, UNDROP SCHEMA restores everything in one statement."
+        },
+        "c": {
+          "text": "Restore from a nightly backup",
+          "feedback": "Snowflake doesn't rely on nightly backups for this. UNDROP recovers the dropped schema directly."
+        },
+        "d": {
+          "text": "Nothing — dropping a schema is irreversible",
+          "feedback": "Not within the retention window. UNDROP SCHEMA reverses an accidental drop."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "What does the <code>DATA_RETENTION_TIME_IN_DAYS</code> parameter control?",
+      "choices": {
+        "a": {
+          "text": "The Time Travel retention window for an object (or account) — how far back you can AT/BEFORE/UNDROP",
+          "feedback": "Correct! It sets the retention window. Default is 1 day; Enterprise+ allows up to 90 days, set at account, database, schema, or table level."
+        },
+        "b": {
+          "text": "How long query results stay in the result cache",
+          "feedback": "That's a separate mechanism. DATA_RETENTION_TIME_IN_DAYS governs Time Travel retention, not result caching."
+        },
+        "c": {
+          "text": "How long before a warehouse auto-suspends",
+          "feedback": "Auto-suspend is a warehouse setting (AUTO_SUSPEND). DATA_RETENTION_TIME_IN_DAYS governs Time Travel."
+        },
+        "d": {
+          "text": "How long Fail-safe keeps data after Time Travel ends",
+          "feedback": "Fail-safe is a fixed, Snowflake-managed period and is not configurable. This parameter controls the self-service Time Travel window."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "How do Time Travel and Fail-safe differ for an admin planning recovery?",
+      "choices": {
+        "a": {
+          "text": "Time Travel is self-service within the retention window; Fail-safe is a short, non-configurable period recoverable only by Snowflake Support",
+          "feedback": "Correct! Design recovery around Time Travel (you control it). Fail-safe is a last-resort safety net you can't query or configure."
+        },
+        "b": {
+          "text": "They're the same feature with two names",
+          "feedback": "No — Time Travel is self-service and configurable; Fail-safe is Snowflake-managed and not self-service."
+        },
+        "c": {
+          "text": "Fail-safe is longer and fully self-service",
+          "feedback": "Fail-safe is not self-service — only Snowflake Support can recover from it, and it's a fixed short window."
+        },
+        "d": {
+          "text": "Time Travel only works on tables; Fail-safe only on schemas",
+          "feedback": "Both operate at object level. The real difference is self-service (Time Travel) vs Snowflake-managed last resort (Fail-safe)."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "You set <code>DATA_RETENTION_TIME_IN_DAYS = 7</code> on a database, but a table inside it has it set to <code>1</code>. What retention applies to that table?",
+      "choices": {
+        "a": {
+          "text": "1 day — the parameter resolves at account/database/schema/table level, and the most specific level (the table) wins",
+          "feedback": "Correct! DATA_RETENTION_TIME_IN_DAYS is inherited down the hierarchy, but the most specific setting overrides. The table's own value of 1 wins over the database's 7."
+        },
+        "b": {
+          "text": "7 days — a database-level setting always overrides its tables",
+          "feedback": "Backwards — inheritance flows down, but the most specific level wins. The table's own value overrides the database default."
+        },
+        "c": {
+          "text": "8 days — the settings add together",
+          "feedback": "Retention settings don't accumulate. Exactly one value is in effect: the most specific one, here the table's 1 day."
+        },
+        "d": {
+          "text": "The account default — object-level settings are ignored",
+          "feedback": "Object-level settings are honored and take precedence over broader defaults. The table's explicit 1 day is what applies."
+        }
+      }
+    }
+  }
+}
