@@ -1,0 +1,260 @@
+{
+  "data_analyst": {
+    "q1": {
+      "prompt": "What does <code>AI_PARSE_DOCUMENT</code> do, and when would you choose LAYOUT mode over OCR?",
+      "choices": {
+        "a": {
+          "text": "It converts PDFs/images into queryable text. Use LAYOUT for structured documents (headings, tables) and OCR for scanned images or handwriting",
+          "feedback": "Correct! AI_PARSE_DOCUMENT extracts text from files. LAYOUT preserves document structure (headings, columns, tables), while OCR is better for scanned paper or handwritten text where structure isn't embedded."
+        },
+        "b": {
+          "text": "It translates documents into another language. LAYOUT is for formal docs, OCR is for informal ones",
+          "feedback": "AI_PARSE_DOCUMENT extracts text — it doesn't translate. For translation you'd use AI_TRANSLATE on the extracted text."
+        },
+        "c": {
+          "text": "It summarizes documents into bullet points. LAYOUT gives long summaries, OCR gives short ones",
+          "feedback": "It extracts raw text, not summaries. You'd chain AI_COMPLETE after parsing to generate summaries from the extracted content."
+        },
+        "d": {
+          "text": "It splits PDFs into individual pages. LAYOUT splits by section, OCR splits by page number",
+          "feedback": "AI_PARSE_DOCUMENT extracts text content — it doesn't split files. The mode determines how text is detected: LAYOUT for structured digital PDFs, OCR for scanned images."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "In the RAG (Retrieval-Augmented Generation) pattern used in this lab, what role does <code>LISTAGG</code> play?",
+      "choices": {
+        "a": {
+          "text": "It combines all document content into one string that gets passed as context to AI_COMPLETE — grounding the AI's answer in your data",
+          "feedback": "Correct! LISTAGG merges all parsed document rows into a single context string. This is the 'Retrieval' part of RAG — the AI can only answer from what you give it. For 100+ docs, you'd use Cortex Search instead."
+        },
+        "b": {
+          "text": "It trains the AI model on your documents so it permanently learns your content",
+          "feedback": "LISTAGG doesn't train anything — it just concatenates text. The AI model isn't modified; it receives your documents as prompt context each time."
+        },
+        "c": {
+          "text": "It indexes your documents for fast keyword search",
+          "feedback": "LISTAGG simply concatenates rows into one string. For indexed retrieval at scale, you'd use Cortex Search Service — LISTAGG is the prototype approach for small collections."
+        },
+        "d": {
+          "text": "It compresses document content to fit within token limits",
+          "feedback": "LISTAGG concatenates without compression. In fact, for large collections LISTAGG can exceed token limits — that's why production systems use Cortex Search to retrieve only relevant chunks."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "How do you pass an image or video file to AI for analysis in Snowflake?",
+      "choices": {
+        "a": {
+          "text": "Use AI_COMPLETE with TO_FILE() pointing to the staged file — the multimodal model processes both the text prompt and visual input together",
+          "feedback": "Correct! The pattern is always: stage the file → reference it with TO_FILE() → pass to AI_COMPLETE with a multimodal model (pixtral-large for images, gemini-3.5-flash for video/audio). Same function, different model."
+        },
+        "b": {
+          "text": "Use AI_PARSE_DOCUMENT to convert the image to text first, then query the text",
+          "feedback": "AI_PARSE_DOCUMENT extracts text from documents — it doesn't analyze visual content like 'what drink is this?' For visual understanding, use AI_COMPLETE with a multimodal model and TO_FILE()."
+        },
+        "c": {
+          "text": "Download the file locally, describe it in words, then pass the description to AI_COMPLETE",
+          "feedback": "No manual description needed! Multimodal models can see images directly. Stage the file in Snowflake, reference it with TO_FILE(), and the model analyzes the visual content itself."
+        },
+        "d": {
+          "text": "Use a separate AI_IMAGE_ANALYZE function designed specifically for visual content",
+          "feedback": "There's no separate function — AI_COMPLETE handles text, images, video, and audio. The model choice (pixtral-large, gemini-3.5-flash) determines which media types are supported."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "Why is the prototype RAG pattern (LISTAGG + AI_COMPLETE) insufficient for production with hundreds of documents?",
+      "choices": {
+        "a": {
+          "text": "LISTAGG would produce a string too large for any model's context window — production uses Cortex Search to retrieve only the most relevant documents per question",
+          "feedback": "Correct! Models have token limits. With 100+ documents, LISTAGG would exceed them. Cortex Search retrieves only the 3–5 most relevant chunks per query — same RAG pattern, smarter retrieval."
+        },
+        "b": {
+          "text": "LISTAGG is too slow — it takes hours to concatenate large document collections",
+          "feedback": "Speed isn't the issue — LISTAGG is fast. The problem is that the resulting string exceeds the AI model's context window (token limit), causing the call to fail or truncate content."
+        },
+        "c": {
+          "text": "AI_COMPLETE can only process one document at a time in production mode",
+          "feedback": "AI_COMPLETE can accept large context — the limit is the model's token window, not a one-document restriction. The issue is that LISTAGG of hundreds of docs exceeds that window."
+        },
+        "d": {
+          "text": "LISTAGG costs more credits than Cortex Search per query",
+          "feedback": "The cost issue is actually the opposite — sending all documents every time (if it were possible) would use more tokens than retrieving just the relevant ones. But the primary blocker is the token limit, not cost."
+        }
+      }
+    }
+  },
+  "data_engineer": {
+    "q1": {
+      "prompt": "You created a Cortex Search Service with <code>TARGET_LAG = '1 hour'</code>. What happens when you INSERT new rows into the source table?",
+      "choices": {
+        "a": {
+          "text": "The search service automatically picks up the new rows within the TARGET_LAG window — no rebuild or recreation needed",
+          "feedback": "Correct! Cortex Search is incremental by design. New rows become searchable within the TARGET_LAG window. You just INSERT and the service handles re-indexing automatically."
+        },
+        "b": {
+          "text": "You must DROP and recreate the search service to index new data",
+          "feedback": "No — that would be wasteful and cause downtime. The search service is a managed object that auto-refreshes based on TARGET_LAG. Just INSERT new rows."
+        },
+        "c": {
+          "text": "New rows require a manual REFRESH command on the search service",
+          "feedback": "There's no manual REFRESH command for Cortex Search. The service automatically refreshes based on the TARGET_LAG interval you configured."
+        },
+        "d": {
+          "text": "New rows are immediately searchable with zero delay",
+          "feedback": "Not quite — there's a delay up to the TARGET_LAG value (1 hour in this case). This is configurable: shorter lag = fresher results but more compute cost."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "Why store embeddings in the same table as the source content rather than a separate vector store?",
+      "choices": {
+        "a": {
+          "text": "It preserves lineage (you always know which content produced which vector) and keeps updates atomic — one INSERT handles both text and embedding together",
+          "feedback": "Correct! Co-location means lineage is implicit, updates are atomic (no sync issues between two stores), and your incremental pattern is simple: WHERE content_embedding IS NULL."
+        },
+        "b": {
+          "text": "Snowflake doesn't support storing vectors in separate tables",
+          "feedback": "You can store vectors anywhere — even in a different table or schema. Co-location is a best practice for lineage and atomicity, not a technical limitation."
+        },
+        "c": {
+          "text": "Embeddings must be in the same table for VECTOR_COSINE_SIMILARITY to work",
+          "feedback": "VECTOR_COSINE_SIMILARITY works across tables (via JOINs). Co-location is about operational simplicity and data integrity, not a function requirement."
+        },
+        "d": {
+          "text": "Separate tables would make embeddings take longer to compute",
+          "feedback": "Computation time is the same regardless of where you store the result. The benefit is operational: atomic updates, clear lineage, and simpler incremental patterns."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "Your pipeline Task uses <code>WHERE content_embedding IS NULL</code> when generating embeddings. What pattern does this implement?",
+      "choices": {
+        "a": {
+          "text": "Incremental processing — only compute embeddings for newly inserted rows that haven't been processed yet, avoiding re-work on existing data",
+          "feedback": "Correct! This is the incremental pattern. Each Task run only processes new/unprocessed rows. Without it, you'd re-embed all rows every run — wasting compute on work already done."
+        },
+        "b": {
+          "text": "Error handling — it retries rows where embedding failed by checking for NULL",
+          "feedback": "While it would also catch failed rows, that's not the primary purpose. The pattern is about incremental processing: skip rows that already have embeddings, only compute for new ones."
+        },
+        "c": {
+          "text": "Data validation — it filters out rows with bad content that can't be embedded",
+          "feedback": "NULL embedding means 'not yet computed,' not 'bad content.' The pattern ensures each run only processes new rows, making the pipeline efficient and idempotent."
+        },
+        "d": {
+          "text": "Cost optimization — it limits the number of embeddings generated per run to stay under budget",
+          "feedback": "It doesn't limit count — it processes ALL rows without embeddings. The optimization is avoiding redundant re-computation of rows that were already processed in previous runs."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "What is the advantage of a <strong>Cortex Agent</strong> over building your own retrieve-then-generate logic with AI_COMPLETE?",
+      "choices": {
+        "a": {
+          "text": "The Agent encapsulates the full RAG pattern in one managed object — retrieval, context assembly, and generation happen internally without your app needing to implement any of it",
+          "feedback": "Correct! The Agent is a centralised abstraction. Your app just sends a question; the Agent handles searching, ranking, context assembly, and answer generation. Multiple apps can share the same Agent without duplicating logic."
+        },
+        "b": {
+          "text": "Cortex Agents are faster because they skip the search step entirely",
+          "feedback": "Agents don't skip search — they use it. The advantage is that search + generation is encapsulated into one managed object rather than requiring your app to orchestrate multiple steps."
+        },
+        "c": {
+          "text": "Agents are free while AI_COMPLETE consumes credits",
+          "feedback": "Agents also consume credits (they use AI models internally). The benefit is architectural: one managed object replaces custom retrieval + generation logic in every consuming app."
+        },
+        "d": {
+          "text": "Agents can access data outside Snowflake while AI_COMPLETE cannot",
+          "feedback": "Both are scoped to Snowflake data. The advantage is operational: the Agent manages the RAG workflow so your applications don't have to implement retrieve-rank-generate themselves."
+        }
+      }
+    }
+  },
+  "platform_admin": {
+    "q1": {
+      "prompt": "When should you apply <code>AI_REDACT</code> to customer interaction logs?",
+      "choices": {
+        "a": {
+          "text": "At ingestion time — before the data is written to the log table, not after the fact",
+          "feedback": "Correct! Once PII is stored unredacted, you've already created a compliance risk — even if you redact later. Apply redaction at the point of ingestion so PII never enters your analytics tables."
+        },
+        "b": {
+          "text": "Monthly, during scheduled compliance audits",
+          "feedback": "Too late! PII sitting in your tables for weeks is a compliance risk and a data breach waiting to happen. Redact at ingestion time so PII never persists."
+        },
+        "c": {
+          "text": "Only when a customer explicitly requests data deletion under GDPR",
+          "feedback": "That's a separate obligation (right to erasure). Proactive redaction at ingestion prevents PII from being stored in the first place — you don't need a customer request to practice good hygiene."
+        },
+        "d": {
+          "text": "After the AI agent has finished generating its response",
+          "feedback": "The agent's response is the output. The concern is the customer's input (names, emails, phone numbers in their question). Redact the input before logging it, not after the response is generated."
+        }
+      }
+    },
+    "q2": {
+      "prompt": "<code>AI_FILTER</code> returns FALSE on an agent response. What should happen in production?",
+      "choices": {
+        "a": {
+          "text": "Block the response and show a generic fallback message to the customer — never display flagged content",
+          "feedback": "Correct! FALSE means the response failed your brand-safety criteria (dismissive, off-topic, mentions competitors, etc.). Replace it with a safe fallback like 'Let me find a better answer for you' and log the incident for review."
+        },
+        "b": {
+          "text": "Display the response anyway but flag it for later human review",
+          "feedback": "Too late — the customer already saw the off-brand response. In production, the filter must gate the output. Block first, review later. One bad response on social media can damage brand reputation."
+        },
+        "c": {
+          "text": "Retry with a different model until AI_FILTER returns TRUE",
+          "feedback": "This could work as a retry strategy, but it introduces latency and still might not pass. The safe default is: block with a fallback immediately, then optionally retry in the background."
+        },
+        "d": {
+          "text": "Delete the customer's question from the log so it can't be reproduced",
+          "feedback": "The issue is the agent's response, not the customer's question. And deleting logs destroys your audit trail. Block the response, show a fallback, and log the incident for governance review."
+        }
+      }
+    },
+    "q3": {
+      "prompt": "Two models produce the same token count for the same prompt. Why does the larger model (70b) cost more?",
+      "choices": {
+        "a": {
+          "text": "The cost difference is in price-per-token, not token count — larger models require more compute (GPU) per token, so Snowflake charges a higher rate",
+          "feedback": "Correct! Models in the same family share a tokenizer, so token counts are identical. The cost difference is the per-token rate: 70b needs more GPU memory and processing time per token, making each token ~5-8x more expensive."
+        },
+        "b": {
+          "text": "The 70b model generates more tokens in its response",
+          "feedback": "Not necessarily — the lab shows both models can produce the same token count. The cost difference is the rate per token, not the quantity of tokens."
+        },
+        "c": {
+          "text": "Larger models require a dedicated warehouse while smaller ones use serverless compute",
+          "feedback": "Both use serverless Cortex compute. The difference is purely the per-token credit rate: larger models consume more GPU resources per token processed."
+        },
+        "d": {
+          "text": "The 70b model stores more data in your account, increasing storage costs",
+          "feedback": "You don't store the model — Snowflake hosts it. The cost is purely compute (credits per token processed), and larger models have a higher per-token rate."
+        }
+      }
+    },
+    "q4": {
+      "prompt": "What is the correct order for the governed AI interaction flow?",
+      "choices": {
+        "a": {
+          "text": "Redact PII from input → Generate AI response → Moderate output with AI_FILTER → Log the interaction",
+          "feedback": "Correct! This is the full governed flow: clean the input first (privacy), generate the response, check it for brand safety before showing to the customer, then log everything for audit purposes."
+        },
+        "b": {
+          "text": "Generate AI response → Log the interaction → Redact PII → Moderate output",
+          "feedback": "Wrong order. If you generate first with unredacted input, PII enters the AI context. If you log before moderating, you might display a bad response. Redact first, moderate before display."
+        },
+        "c": {
+          "text": "Moderate the customer's question → Generate AI response → Redact PII → Log",
+          "feedback": "You moderate the agent's output, not the customer's input. The customer might ask anything — it's the agent's response that must be brand-safe. And redaction should happen before generation, not after."
+        },
+        "d": {
+          "text": "Log everything first → Then apply redaction and moderation in a separate batch job",
+          "feedback": "Logging unredacted, unmoderated content defeats the purpose. PII would be stored (compliance risk) and bad responses would have already been shown to customers. The flow must be inline, not batched."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+definition_version: 2
+entities:
+  coffee_kiosk:
+    type: streamlit
+    identifier: coffee_kiosk
+    main_file: coffee_kiosk.py
+    query_warehouse: PLATPLUS_WH
+    compute_pool: SYSTEM_COMPUTE_POOL_CPU
+    runtime_name: SYSTEM$ST_CONTAINER_RUNTIME_PY3_11
+    external_access_integrations:
+      - PYPI_ACCESS_INTEGRATION
+    artifacts:
+      - coffee_kiosk.py

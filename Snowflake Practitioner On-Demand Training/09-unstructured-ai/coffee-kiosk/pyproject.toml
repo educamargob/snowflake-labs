@@ -1,0 +1,12 @@
+[project]
+name = "coffee_kiosk"
+version = "0.1.0"
+requires-python = ">=3.11"
+# Workspaces apps run on the container runtime (uv). It requires a dependency
+# file that lists Streamlit, and installs it from PyPI via the app's attached
+# External Access Integration (PYPI_ACCESS_INTEGRATION — see snowflake.yml).
+# streamlit[snowflake] bundles the Snowflake connector + Snowpark, so
+# st.connection("snowflake") works.
+dependencies = [
+    "streamlit[snowflake]>=1.50",
+]
